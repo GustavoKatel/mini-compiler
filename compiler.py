@@ -1,6 +1,8 @@
 
-from lib import lexer
+from lib.lexer import Lexer
 
-table = lexer.parse('src/example.pas')
+lexer = Lexer('sources/example1.pas')
+
+table = lexer.parse()
 
 # TODO serialize table to file
