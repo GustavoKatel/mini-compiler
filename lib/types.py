@@ -44,7 +44,7 @@ class Types:
         elif t == Types.DELIMTER:
             return 'Delimitador'
         elif t == Types.CMD_ATTR:
-            return 'Delimitador'
+            return 'Comando atribuicao'
         elif t == Types.RELATIONAL_OPERATOR:
             return 'Operador relacional'
         elif t == Types.ADD_OPERATOR:
