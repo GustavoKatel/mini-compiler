@@ -23,22 +23,37 @@ class Lexer:
     def parseLoop(self):
         fd_pos = 0
         char = None
-        line = 0
+        line = 1
         token_str = ""
+        comment_count = 0
         while True:
             char = self.fd.read(1)
             fd_pos += 1
 
-            if char == ' ' or  # whitespace
-            char == '\r' or  # ignore carrier
-            char == '\t':  # ignore tabs
+            # whitespace, carrier, tabs
+            if char == ' ' or char == '\r' or char == '\t':
                 continue
 
             elif char == '':  # EOF
+                if comment_count > 0:
+                    raise Exception('Invalid syntax. Comment section not closed')
                 return
 
             elif char == '\n':  # new line
                 line += 1
+                continue
+
+            elif char == Types.COMMENT_OPEN:  # open comment section
+                comment_count += 1
+                continue
+
+            elif char == Types.COMMENT_CLOSE:  # close comment section
+                comment_count -= 1
+                if comment_count < 0:
+                    raise Exception('Invalid syntax in line %s. Invalid comment operator' % line)
+                continue
+
+            elif comment_count:  # ignore comments
                 continue
 
             # a,b) check IDENTIFIER/KEYWORD
@@ -64,7 +79,7 @@ class Lexer:
                 else:
                     token = Token(token_str, line, Types.IDENTIFIER)
                 self.tokens.append(token)
-                print "Found token: %s" % token
+                # print "Found token: %s" % token
 
             # c,d) check NUMBER
             elif char.isdigit():
@@ -92,7 +107,7 @@ class Lexer:
                 else:
                     token = Token(token_str, line, Types.NUMBER_INT)
                 self.tokens.append(token)
-                print "Found token: %s" % token
+                # print "Found token: %s" % token
 
             # e,f) delimiter. Also checks the CMD_ATTR
             elif char in Types.DELIMTER_LIST:
@@ -112,12 +127,49 @@ class Lexer:
 
                 token = Token(token_str, line, ttype)
                 self.tokens.append(token)
-                print "Found token: %s" % token
+                # print "Found token: %s" % token
 
             # g) Relational operators
-            elif char in Types.RELATIONAL_OPERATOR_LIST:
+            # elif char in Types.RELATIONAL_OPERATOR_LIST:
+            elif self._in_list_first_char(char, Types.RELATIONAL_OPERATOR_LIST):
                 token_str = ""
-                while token_str+char in Types.RELATIONAL_OPERATOR_LIST:
+                while True:
+                    if not self._in_list_starts_with(token_str+char, Types.RELATIONAL_OPERATOR_LIST):
+                        fd_pos -= 1
+                        self.fd.seek(fd_pos)
+                        break
                     token_str += char
                     char = self.fd.read(1)
                     fd_pos += 1
+                    if char == '':
+                        break
+
+                # we have a token
+                token = Token(token_str, line, Types.RELATIONAL_OPERATOR)
+                self.tokens.append(token)
+
+            # h) additive operators
+            elif char in Types.ADD_OPERATOR_LIST:
+                token = Token(char, line, Types.ADD_OPERATOR)
+                self.tokens.append(token)
+
+            #  i) multiplicative operators
+            elif char in Types.MUL_OPERATOR_LIST:
+                token = Token(char, line, Types.MUL_OPERATOR)
+                self.tokens.append(token)
+
+            else:
+                raise Exception('Invalid symbol in line: %s col: %s symbol: %s'
+                                % (line, fd_pos, char))
+
+    def _in_list_first_char(self, char, mlist):
+        for item in mlist:
+            if char == item[0]:
+                return True
+        return False
+
+    def _in_list_starts_with(self, str, mlist):
+        for item in mlist:
+            if item.startswith(str):
+                return True
+        return False
