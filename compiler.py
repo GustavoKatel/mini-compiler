@@ -10,9 +10,13 @@ if len(sys.argv) > 1:
 
 lexer = Lexer(fname)
 
-tokens = lexer.parse()
+try:
+    tokens = lexer.parse()
+except Exception as e:
+    print e
+    sys.exit(1)
 
-template = "{0:10} {1:20} {2:5}"  # column widths: 10, 20, 5
+template = "{0:10} {1:25} {2:5}"  # column widths: 10, 20, 5
 
 print template.format('Token', 'Classificacao', 'Linha')
 

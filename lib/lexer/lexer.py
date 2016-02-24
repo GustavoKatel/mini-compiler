@@ -15,8 +15,7 @@ class Lexer:
         try:
             self.parseLoop()
         except Exception as e:
-            print e
-            return None
+            raise e
 
         return self.tokens
 
@@ -55,31 +54,6 @@ class Lexer:
 
             elif comment_count:  # ignore comments
                 continue
-
-            # a,b) check IDENTIFIER/KEYWORD
-            elif char.isalpha():  # is alpha
-                token_str = char
-
-                while True:  # tries to match a word
-                    char = self.fd.read(1)
-                    fd_pos += 1
-                    if char.isalnum() or char == '_':  # letters, numbers and _
-                        token_str += char
-                        continue
-                    elif char == '':  # EOF
-                        break
-                    else:  # not a word
-                        fd_pos -= 1
-                        self.fd.seek(fd_pos)  # go back one char
-                        break
-
-                # we have a token at token_str.
-                if token_str in Types.KEYWORD_LIST:  # it is a keyword
-                    token = Token(token_str, line, Types.KEYWORD)
-                else:
-                    token = Token(token_str, line, Types.IDENTIFIER)
-                self.tokens.append(token)
-                # print "Found token: %s" % token
 
             # c,d) check NUMBER
             elif char.isdigit():
@@ -149,14 +123,65 @@ class Lexer:
                 self.tokens.append(token)
 
             # h) additive operators
-            elif char in Types.ADD_OPERATOR_LIST:
-                token = Token(char, line, Types.ADD_OPERATOR)
+            elif self._in_list_starts_with(char, Types.ADD_OPERATOR_LIST):
+
+                token_str = ""
+                while True:
+                    if not self._in_list_starts_with(token_str+char, Types.ADD_OPERATOR_LIST):
+                        fd_pos -= 1
+                        self.fd.seek(fd_pos)
+                        break
+                    token_str += char
+                    char = self.fd.read(1)
+                    fd_pos += 1
+                    if char == '':
+                        break
+
+                token = Token(token_str, line, Types.ADD_OPERATOR)
                 self.tokens.append(token)
 
             #  i) multiplicative operators
-            elif char in Types.MUL_OPERATOR_LIST:
-                token = Token(char, line, Types.MUL_OPERATOR)
+            elif self._in_list_starts_with(char, Types.MUL_OPERATOR_LIST):
+
+                token_str = ""
+                while True:
+                    if not self._in_list_starts_with(token_str+char, Types.MUL_OPERATOR_LIST):
+                        fd_pos -= 1
+                        self.fd.seek(fd_pos)
+                        break
+                    token_str += char
+                    char = self.fd.read(1)
+                    fd_pos += 1
+                    if char == '':
+                        break
+
+                token = Token(token_str, line, Types.MUL_OPERATOR)
                 self.tokens.append(token)
+
+            # a,b) check IDENTIFIER/KEYWORD
+            elif char.isalpha():  # is alpha
+                token_str = char
+
+                while True:  # tries to match a word
+                    char = self.fd.read(1)
+                    fd_pos += 1
+                    if char.isalnum() or char == '_':  # letters, numbers and _
+                        token_str += char
+                        continue
+                    elif char == '':  # EOF
+                        break
+                    else:  # not a word
+                        fd_pos -= 1
+                        self.fd.seek(fd_pos)  # go back one char
+                        break
+
+                # we have a token at token_str.
+                if token_str in Types.KEYWORD_LIST:  # it is a keyword
+                    token = Token(token_str, line, Types.KEYWORD)
+                else:
+                    token = Token(token_str, line, Types.IDENTIFIER)
+                self.tokens.append(token)
+                # print "Found token: %s" % token
 
             else:
                 raise Exception('Invalid symbol in line: %s col: %s symbol: %s'

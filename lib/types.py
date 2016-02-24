@@ -23,9 +23,9 @@ class Types:
 
     RELATIONAL_OPERATOR_LIST = ["=", "<", ">", "<=", ">=", "<>"]
 
-    ADD_OPERATOR_LIST = ["+", "-"]
+    ADD_OPERATOR_LIST = ["+", "-", "or"]
 
-    MUL_OPERATOR_LIST = ["*", "/"]
+    MUL_OPERATOR_LIST = ["*", "/", "and"]
 
     COMMENT_OPEN = '{'
 
