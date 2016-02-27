@@ -34,8 +34,8 @@ class Lexer:
                 continue
 
             elif char == '':  # EOF
-                if comment_count > 0:
-                    raise Exception('Invalid syntax. Comment section not closed')
+                if not comment_count == 0:
+                    raise Exception('Invalid syntax. Comment section not closed or closed more than once')
                 return
 
             elif char == '\n':  # new line
@@ -67,9 +67,15 @@ class Lexer:
                         token_str += char
                         continue
                     elif char == '.':  # floating point
+                        if found_float == True:
+                            raise Exception('Invalid number in line: %s symbol: %s'
+                                            % (line, token_str+char))
                         token_str += char
                         found_float = True
                         continue
+                    elif char.isalpha():
+                        raise Exception('Symbol does not belongs to the language in line: %s symbol: %s'
+                                        % (line, token_str+char))
                     else:  # something else
                         fd_pos -= 1
                         self.fd.seek(fd_pos)
@@ -115,7 +121,7 @@ class Lexer:
                     token_str += char
                     char = self.fd.read(1)
                     fd_pos += 1
-                    if char == '':
+                    if char == '':  # eof
                         break
 
                 # we have a token
@@ -184,8 +190,8 @@ class Lexer:
                 # print "Found token: %s" % token
 
             else:
-                raise Exception('Invalid symbol in line: %s col: %s symbol: %s'
-                                % (line, fd_pos, char))
+                raise Exception('Invalid symbol in line: %s symbol: %s'
+                                % (line, char))
 
     def _in_list_first_char(self, char, mlist):
         for item in mlist:
