@@ -2,6 +2,7 @@
 
 import sys
 from lib.lexer import Lexer
+from lib.syntactic import Syntactic
 
 fname = 'sources/example1.pas'
 
@@ -22,5 +23,8 @@ print template.format('Token', 'Classificacao', 'Linha')
 
 for tok in tokens:
     print template.format(*tok.get_tuple())
+
+syntactic = Syntactic(tokens)
+syntactic.parse()
 
 # TODO serialize table to file
