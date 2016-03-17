@@ -38,6 +38,25 @@ class Lexer:
                     raise Exception('Invalid syntax. Comment section not closed or closed more than once')
                 return
 
+            elif char == '/':  # comments with //
+                fd_pos += 1
+                next_char = self.fd.read(1)
+                if next_char == '/':
+                    while True:
+                        ig = self.fd.read(1)
+                        fd_pos += 1
+                        if ig == '\n' or ig == '':
+                            fd_pos -= 1
+                            self.fd.seek(fd_pos)
+                            break
+                else:
+                    token = Token('/', line, Types.MUL_OPERATOR)
+                    self.tokens.append(token)
+
+                    fd_pos -= 1
+                    self.fd.seek(fd_pos)
+                    continue
+
             elif char == '\n':  # new line
                 line += 1
                 continue
@@ -59,6 +78,8 @@ class Lexer:
             elif char.isdigit():
                 token_str = char
                 found_float = False
+                found_plus = False
+                found_complex = False
 
                 while True:  # tries to match a number
                     char = self.fd.read(1)
@@ -67,25 +88,69 @@ class Lexer:
                         token_str += char
                         continue
                     elif char == '.':  # floating point
-                        if found_float == True:
+                        if found_float:
                             raise Exception('Invalid number in line: %s symbol: %s'
                                             % (line, token_str+char))
                         token_str += char
                         found_float = True
                         continue
+                    elif char == '+':
+                        if found_plus == True or found_complex:
+                            raise Exception('Invalid number in line: %s symbol: %s'
+                                            % (line, token_str+char))
+
+                        next_char = self.fd.read(1)
+                        fd_pos += 1
+
+                        if next_char == 'i':
+
+                            next_next_char = self.fd.read(1)
+                            fd_pos += 1
+                            if not next_next_char.isdigit():
+                                fd_pos -= 3
+                                self.fd.seek(fd_pos)
+                                break
+                            else:
+                                token_str += "+i"+next_next_char
+                                found_complex = True
+                                found_plus = True
+
+                        else:
+                            fd_pos -= 2
+                            self.fd.seek(fd_pos)
+                            break
+
+                        continue
+                    # elif char == 'i':
+                    #     if found_complex == True:
+                    #         raise Exception('Invalid number in line: %s symbol: %s'
+                    #                         % (line, token_str+char))
+                    #     token_str += char
+                    #     found_complex = True
+                    #     continue
                     elif char.isalpha():
-                        raise Exception('Symbol does not belongs to the language in line: %s symbol: %s'
+                        raise Exception('Symbol does not belong to the language in line: %s symbol: %s'
                                         % (line, token_str+char))
                     else:  # something else
+                        # if not token_str[-1:].isdigit():
+                        #     if found_complex or found_plus:
+                        #         raise Exception('Invalid number in line: %s symbol: %s'
+                        #                         % (line, token_str+char))
                         fd_pos -= 1
                         self.fd.seek(fd_pos)
                         break
 
                 # we have a token at token_str
-                if found_float:
-                    token = Token(token_str, line, Types.NUMBER_REAL)
+                if found_complex and found_plus:
+                    token = Token(token_str, line, Types.NUMBER_COMPLEX)
+                elif found_complex or found_plus:
+                    raise Exception('Invalid number in line: %s symbol: %s'
+                                    % (line, token_str+char))
                 else:
-                    token = Token(token_str, line, Types.NUMBER_INT)
+                    if found_float:
+                        token = Token(token_str, line, Types.NUMBER_REAL)
+                    else:
+                        token = Token(token_str, line, Types.NUMBER_INT)
                 self.tokens.append(token)
                 # print "Found token: %s" % token
 
@@ -132,6 +197,7 @@ class Lexer:
             elif self._in_list_starts_with(char, Types.ADD_OPERATOR_LIST):
 
                 token_str = ""
+                last_char = char
                 while True:
                     if not self._in_list_starts_with(token_str+char, Types.ADD_OPERATOR_LIST):
                         fd_pos -= 1
@@ -139,6 +205,11 @@ class Lexer:
                         break
                     token_str += char
                     char = self.fd.read(1)
+
+                    # if char == 'i' and last_char == '+':
+                    #     raise Exception('Invalid number in line: %s symbol: %s'
+                    #                     % (line, token_str+char))
+
                     fd_pos += 1
                     if char == '':
                         break
@@ -182,7 +253,9 @@ class Lexer:
                         break
 
                 # we have a token at token_str.
-                if token_str in Types.KEYWORD_LIST:  # it is a keyword
+                if token_str == "not":
+                    token = Token(token_str, line, Types.LOGICAL_OPERATOR)
+                elif token_str in Types.KEYWORD_LIST:  # it is a keyword
                     token = Token(token_str, line, Types.KEYWORD)
                 else:
                     token = Token(token_str, line, Types.IDENTIFIER)

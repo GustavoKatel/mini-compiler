@@ -12,6 +12,8 @@ class Types:
     RELATIONAL_OPERATOR = 7
     ADD_OPERATOR = 8
     MUL_OPERATOR = 9
+    NUMBER_COMPLEX = 10
+    LOGICAL_OPERATOR = 11
 
     KEYWORD_LIST = ["program", "var", "integer", "real", "boolean",
                     "procedure", "begin", "end", "if", "then", "else", "while",
@@ -51,5 +53,9 @@ class Types:
             return 'Operador aditivo'
         elif t == Types.MUL_OPERATOR:
             return 'Operador multiplicativo'
+        elif t == Types.NUMBER_COMPLEX:
+            return 'Número complexo'
+        elif t == Types.LOGICAL_OPERATOR:
+            return 'Operador lógico'
         else:
             return 'Não identificado'
