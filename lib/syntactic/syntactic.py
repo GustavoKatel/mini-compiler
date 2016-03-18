@@ -76,6 +76,7 @@ class Syntactic:
                     if self.tokens[self.index_atual].type == Types.DELIMTER and
                         self.tokens[self.index_atual].str == ";":
 
+                        self.index_atual+=1
                         return self.lista_declaracoes_variaveis_2()
 
                     else:
@@ -107,6 +108,7 @@ class Syntactic:
                     if self.tokens[self.index_atual].type == Types.DELIMTER and
                         self.tokens[self.index_atual].str == ";":
 
+                        self.index_atual+=1
                         return self.lista_declaracoes_variaveis_2()
 
                     else:
@@ -145,6 +147,7 @@ class Syntactic:
             self.index_atual+=1
             if self.tokens[self.index_atual].type == Types.IDENTIFIER:
 
+                self.index_atual+=1
                 return self.lista_de_identificadores_2()
 
             else:
@@ -186,6 +189,7 @@ class Syntactic:
             if self.tokens[self.index_atual].type == Type.DELIMTER and
                 self.tokens[self.index_atual].str == ";":
 
+                self.index_atual+=1
                 return self.declaracoes_de_subprogramas_2()
 
             else:
@@ -238,3 +242,92 @@ class Syntactic:
 
         else:
             return False
+
+
+    def argumentos(self):
+        index = self.index_atual
+
+        if self.tokens[self.index_atual].type == Type.DELIMTER and
+            self.tokens[self.index_atual].str == "(":
+
+            self.index_atual+=1
+            if self.lista_de_parametros() == True:
+
+                self.index_atual+=1
+                if self.tokens[self.index_atual].type == Type.DELIMTER and
+                    self.tokens[self.index_atual].str == ")":
+
+                    return True
+
+                else:
+                    self.index_atual = index
+                    return True
+
+            else:
+                self.index_atual = index
+                return True
+
+        else:
+            self.index_atual = index
+            return True
+
+    def lista_de_parametros(self):
+        index = self.index_atual
+
+        if self.lista_de_identificadores() == True:
+
+            self.index_atual+=1
+            if self.tokens[self.index_atual].type == Types.DELIMTER and
+                self.tokens[self.index_atual].str == ":":
+
+                self.index_atual+=1
+                if self.tipo() == True:
+
+                    self.index_atual+=1
+                    return self.lista_de_parametros_2()
+
+                else:
+                    return False
+
+            else:
+                return False
+
+        else:
+            return False
+
+    def lista_de_parametros_2(self):
+        index = self.index_atual
+
+        if self.tokens[self.index_atual].type == Types.DELIMTER and
+            self.tokens[self.index_atual].str == ";"
+
+            self.index_atual+=1
+            if self.lista_de_identificadores() == True:
+
+                self.index_atual+=1
+                if self.tokens[self.index_atual].type == Types.DELIMTER and
+                    self.tokens[self.index_atual].str == ":":
+
+                    self.index_atual+=1
+                    if self.tipo() == True:
+
+                        self.index_atual+=1
+                        if self.lista_de_parametros_2() == False:
+                            self.index_atual = index
+                            return True
+
+                    else:
+                        self.index_atual = index
+                        return True
+
+                else:
+                    self.index_atual = index
+                    return True
+
+            else:
+                self.index_atual = index
+                return True
+
+        else:
+            self.index_atual = index
+            return True
