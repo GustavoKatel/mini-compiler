@@ -78,6 +78,15 @@ class Syntactic:
 
                         return self.lista_declaracoes_variaveis_2()
 
+                    else:
+                        return False
+
+                else:
+                    return False
+
+            else:
+                return False
+
         else:
             return False
 
@@ -100,6 +109,132 @@ class Syntactic:
 
                         return self.lista_declaracoes_variaveis_2()
 
+                    else:
+                        self.index_atual = index
+                        return True
+
+                else:
+                    self.index_atual = index
+                    return True
+
+            else:
+                self.index_atual = index
+                return True
+
         else:
             self.index_atual = index
             return True
+
+    def lista_de_identificadores(self):
+        index = self.index_atual
+
+        if self.tokens[self.index_atual].type == Types.IDENTIFIER:
+
+            self.index_atual+=1
+            return self.lista_de_identificadores_2()
+
+        else:
+            return False
+
+    def lista_de_identificadores_2(self):
+        index = self.index_atual
+
+        if self.tokens[self.index_atual].type == Types.DELIMTER and
+            self.tokens[self.index_atual].str == ",":
+
+            self.index_atual+=1
+            if self.tokens[self.index_atual].type == Types.IDENTIFIER:
+
+                return self.lista_de_identificadores_2()
+
+            else:
+                self.index_atual = index
+                return True
+
+        else:
+            self.index_atual = index
+            return True
+
+    def tipo(self):
+        index = self.index_atual
+
+        if self.tokens[self.index_atual].type == Types.KEYWORD and
+            self.tokens[self.index_atual].str == "integer":
+            return True
+
+        if self.tokens[self.index_atual].type == Types.KEYWORD and
+            self.tokens[self.index_atual].str == "real":
+            return True
+
+        if self.tokens[self.index_atual].type == Types.KEYWORD and
+            self.tokens[self.index_atual].str == "boolean":
+            return True
+
+        return False
+
+    def declaracoes_de_subprogramas(self):
+        index = self.index_atual
+
+        return self.declaracoes_de_subprogramas_2()
+
+    def declaracoes_de_subprogramas_2(self):
+        index = self.index_atual
+
+        if self.declaracao_de_subprograma() == True:
+
+            self.index_atual+=1
+            if self.tokens[self.index_atual].type == Type.DELIMTER and
+                self.tokens[self.index_atual].str == ";":
+
+                return self.declaracoes_de_subprogramas_2()
+
+            else:
+                self.index_atual = index
+                return True
+
+        else:
+            self.index_atual = index
+            return True
+
+    def declaracao_de_subprograma(self):
+        index = self.index_atual
+
+        if self.tokens[self.index_atual].type == Types.KEYWORD and
+            self.tokens[self.index_atual].str == "procedure":
+
+            self.index_atual+=1
+            if self.tokens[self.index_atual].type == Types.IDENTIFIER:
+
+                self.index_atual+=1
+                if self.argumentos() == True:
+
+                    self.index_atual+=1
+                    if self.tokens[self.index_atual].type == Types.DELIMTER and
+                        self.tokens[self.index_atual].str == ";":
+
+                        self.index_atual+=1
+                        if self.declaracoes_variaveis() == True:
+
+                            self.index_atual+=1
+                            if self.declaracoes_de_subprogramas() == True:
+
+                                self.index_atual+=1
+                                return self.comando_composto()
+
+                            else:
+                                return False
+
+                        else:
+                            return False
+
+                    else:
+                        return False
+
+                else:
+                    return False
+
+            else:
+                return False
+
+        else:
+            return False
