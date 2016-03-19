@@ -385,8 +385,10 @@ class Syntactic:
         if self.tokens[self.index_atual].type == Type.DELIMTER and
             self.tokens[self.index_atual].str == ";":
 
+            self.index_atual+=1
             if self.comando() == True:
 
+                self.index_atual+=1
                 if self.lista_de_comandos_2() == True:
 
                     return True
