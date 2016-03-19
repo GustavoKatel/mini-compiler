@@ -331,3 +331,159 @@ class Syntactic:
         else:
             self.index_atual = index
             return True
+
+    def comando_composto(self):
+        index = self.index_atual
+
+        if self.tokens[self.index_atual].type == Types.KEYWORD and
+            self.tokens[self.index_atual].str == "begin":
+
+            self.index_atual+=1
+            if self.comandos_opcionais() == True:
+
+                self.index_atual+=1
+                if self.tokens[self.index_atual].type == Types.KEYWORD and
+                    self.tokens[self.index_atual].str == "end":
+
+                    return True
+
+                else:
+                    return False
+
+            else:
+                return False
+
+        else:
+            return False
+
+
+    def comandos_opcionais(self):
+        index = self.index_atual
+
+        if self.lista_de_comandos() == True:
+
+            return True
+
+        else:
+            self.index_atual = index
+            return True
+
+    def lista_de_comandos(self):
+        index = self.index_atual
+
+        if self.comando() == True:
+
+            self.index_atual+=1
+            return self.lista_de_comandos_2()
+
+        else:
+            return False
+
+    def lista_de_comandos_2(self):
+        index = self.index_atual
+
+        if self.tokens[self.index_atual].type == Type.DELIMTER and
+            self.tokens[self.index_atual].str == ";":
+
+            if self.comando() == True:
+
+                if self.lista_de_comandos_2() == True:
+
+                    return True
+
+                else:
+                    self.index_atual = index
+                    return True
+
+            else:
+                self.index_atual = index
+                return True
+
+        else:
+            self.index_atual = index
+            return True
+
+    def comando(self):
+        index = self.index_atual
+
+        # primeiro caso
+        if self.variavel() == True:
+
+            self.index_atual+=1
+            if self.tokens[self.index_atual].type == Types.CMD_ATTR and
+                self.tokens[self.index_atual].str == Types.CMD_ATTR_STR:
+
+                self.index_atual+=1
+                if self.expressao() == True:
+
+                    return True
+
+        # backtrack e testa o segundo caso
+        self.index_atual = index
+
+        if self.ativacao_de_procedimento() == True:
+            return True
+
+        # backtrack e testa o terceiro caso
+        self.index_atual = index
+
+        if self.comando_composto() == True:
+            return True
+
+        # backtrack e testa o quarto caso
+        self.index_atual = index
+
+        if self.tokens[self.index_atual].type == Types.KEYWORD and
+            self.tokens[self.index_atual].str == "if":
+
+            self.index_atual+=1
+            if self.expressao() == True:
+
+                self.index_atual+=1
+                if self.tokens[self.index_atual].type == Types.KEYWORD and
+                    self.tokens[self.index_atual].str == "then":
+
+                    self.index_atual+=1
+                    if self.comando() == True:
+
+                        self.index_atual+=1
+                        if self.parte_else() == True:
+                            return True
+
+        # backtrack e testa o quinto caso
+        self.index_atual = index
+
+        if self.tokens[self.index_atual].type == Types.KEYWORD and
+            self.tokens[self.index_atual].str == "while":
+
+            self.index_atual+=1
+            if self.expressao() == True:
+
+                self.index_atual+=1
+                if self.tokens[self.index_atual].type == Types.KEYWORD and
+                    self.tokens[self.index_atual].str == "do":
+
+                    self.index_atual+=1
+                    if self.comando() == True:
+                        return True
+
+        return False
+
+    def parte_else(self):
+        index = self.index_atual
+
+        if self.tokens[self.index_atual].type == Types.KEYWORD and
+            self.tokens[self.index_atual].str == "else":
+
+            self.index_atual+=1
+            if self.comando() == True:
+
+                return True
+
+            else:
+                self.index_atual = index
+                return True
+
+        else:
+            self.index_atual = index
+            return True
