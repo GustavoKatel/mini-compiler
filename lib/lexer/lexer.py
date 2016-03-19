@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 from ..types import Types
 from token import Token
 
@@ -214,6 +214,7 @@ class Lexer:
                     if char == '':
                         break
 
+                # verificar que 'o' não seja adicionar como ADD_OPERATOR (as 'or')
                 if not token_str in Types.ADD_OPERATOR_LIST:
                     token = Token(token_str, line, Types.IDENTIFIER)
                     self.tokens.append(token)
@@ -236,6 +237,7 @@ class Lexer:
                     if char == '':
                         break
 
+                # verificar que 'a' não seja adicionar como MUL_OPERATOR (as 'and')
                 if not token_str in Types.MUL_OPERATOR_LIST:
                     token = Token(token_str, line, Types.IDENTIFIER)
                     self.tokens.append(token)
