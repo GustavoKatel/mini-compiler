@@ -214,8 +214,12 @@ class Lexer:
                     if char == '':
                         break
 
-                token = Token(token_str, line, Types.ADD_OPERATOR)
-                self.tokens.append(token)
+                if not token_str in Types.ADD_OPERATOR_LIST:
+                    token = Token(token_str, line, Types.IDENTIFIER)
+                    self.tokens.append(token)
+                else:
+                    token = Token(token_str, line, Types.ADD_OPERATOR)
+                    self.tokens.append(token)
 
             #  i) multiplicative operators
             elif self._in_list_starts_with(char, Types.MUL_OPERATOR_LIST):
@@ -232,8 +236,12 @@ class Lexer:
                     if char == '':
                         break
 
-                token = Token(token_str, line, Types.MUL_OPERATOR)
-                self.tokens.append(token)
+                if not token_str in Types.MUL_OPERATOR_LIST:
+                    token = Token(token_str, line, Types.IDENTIFIER)
+                    self.tokens.append(token)
+                else:
+                    token = Token(token_str, line, Types.MUL_OPERATOR)
+                    self.tokens.append(token)
 
             # a,b) check IDENTIFIER/KEYWORD
             elif char.isalpha():  # is alpha

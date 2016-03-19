@@ -183,8 +183,8 @@ class Syntactic:
 
     def declaracao_de_subprograma(self):
         index = self.index_atual
-        self.index_atual+=1
 
+        self.index_atual+=1
         if self.tokens[self.index_atual].str == "procedure":
 
             self.index_atual+=1
