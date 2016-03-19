@@ -5,17 +5,17 @@ class Syntactic:
 
     def __init__(self, tokens):
         self.tokens = tokens
-        self.index_atual = 0
+        self.index_atual = -1
 
     def parse(self):
         return self.programa()
 
     def programa(self):
         index = self.index_atual
+        self.index_atual+=1
 
         # self.index_atual é 0
-        if self.tokens[self.index_atual].type != Types.KEYWORD or
-            self.tokens[self.index_atual].str != "program":
+        if self.tokens[self.index_atual].str != "program":
             return False
 
         self.index_atual+=1
@@ -23,25 +23,20 @@ class Syntactic:
             return False
 
         self.index_atual+=1
-        if self.tokens[self.index_atual].type != Types.DELIMTER or
-            self.tokens[self.index_atual].str != ";":
+        if self.tokens[self.index_atual].str != ";":
             return False
 
-        self.index_atual+=1
         if self.declaracoes_variaveis() == False:
             return False
 
-        self.index_atual+=1
         if self.declaracoes_de_subprogramas() == False:
             return False
 
-        self.index_atual+=1
         if self.comando_composto() == False:
             return False
 
         self.index_atual+=1
-        if self.tokens[self.index_atual].type != Types.DELIMTER or
-            self.tokens[self.index_atual].str != ".":
+        if self.tokens[self.index_atual].str != ".":
             return False
 
         return True
@@ -49,11 +44,10 @@ class Syntactic:
 
     def declaracoes_variaveis(self):
         index = self.index_atual
+        self.index_atual+=1
 
-        if self.tokens[self.index_atual].type == Types.KEYWORD and
-            self.tokens[self.index_atual].str == "var":
+        if self.tokens[self.index_atual].str == "var":
 
-            self.index_atual+=1
             return self.lista_declaracoes_variaveis()
 
         else:
@@ -66,17 +60,13 @@ class Syntactic:
         if self.lista_de_identificadores() == True:
 
             self.index_atual+=1
-            if self.tokens[self.index_atual].type == Types.DELIMTER and
-                self.tokens[self.index_atual].str == ":":
+            if self.tokens[self.index_atual].str == ":":
 
-                self.index_atual+=1
                 if self.tipo() == True:
 
                     self.index_atual+=1
-                    if self.tokens[self.index_atual].type == Types.DELIMTER and
-                        self.tokens[self.index_atual].str == ";":
+                    if self.tokens[self.index_atual].str == ";":
 
-                        self.index_atual+=1
                         return self.lista_declaracoes_variaveis_2()
 
                     else:
@@ -98,17 +88,13 @@ class Syntactic:
         if self.lista_de_identificadores() == True:
 
             self.index_atual+=1
-            if self.tokens[self.index_atual].type == Types.DELIMTER and
-                self.tokens[self.index_atual].str == ":":
+            if self.tokens[self.index_atual].str == ":":
 
-                self.index_atual+=1
                 if self.tipo() == True:
 
                     self.index_atual+=1
-                    if self.tokens[self.index_atual].type == Types.DELIMTER and
-                        self.tokens[self.index_atual].str == ";":
+                    if self.tokens[self.index_atual].str == ";":
 
-                        self.index_atual+=1
                         return self.lista_declaracoes_variaveis_2()
 
                     else:
@@ -129,10 +115,10 @@ class Syntactic:
 
     def lista_de_identificadores(self):
         index = self.index_atual
+        self.index_atual+=1
 
         if self.tokens[self.index_atual].type == Types.IDENTIFIER:
 
-            self.index_atual+=1
             return self.lista_de_identificadores_2()
 
         else:
@@ -140,14 +126,13 @@ class Syntactic:
 
     def lista_de_identificadores_2(self):
         index = self.index_atual
+        self.index_atual+=1
 
-        if self.tokens[self.index_atual].type == Types.DELIMTER and
-            self.tokens[self.index_atual].str == ",":
+        if self.tokens[self.index_atual].str == ",":
 
             self.index_atual+=1
             if self.tokens[self.index_atual].type == Types.IDENTIFIER:
 
-                self.index_atual+=1
                 return self.lista_de_identificadores_2()
 
             else:
@@ -160,17 +145,15 @@ class Syntactic:
 
     def tipo(self):
         index = self.index_atual
+        self.index_atual+=1
 
-        if self.tokens[self.index_atual].type == Types.KEYWORD and
-            self.tokens[self.index_atual].str == "integer":
+        if self.tokens[self.index_atual].str == "integer":
             return True
 
-        if self.tokens[self.index_atual].type == Types.KEYWORD and
-            self.tokens[self.index_atual].str == "real":
+        if self.tokens[self.index_atual].str == "real":
             return True
 
-        if self.tokens[self.index_atual].type == Types.KEYWORD and
-            self.tokens[self.index_atual].str == "boolean":
+        if self.tokens[self.index_atual].str == "boolean":
             return True
 
         return False
@@ -186,10 +169,8 @@ class Syntactic:
         if self.declaracao_de_subprograma() == True:
 
             self.index_atual+=1
-            if self.tokens[self.index_atual].type == Type.DELIMTER and
-                self.tokens[self.index_atual].str == ";":
+            if self.tokens[self.index_atual].str == ";":
 
-                self.index_atual+=1
                 return self.declaracoes_de_subprogramas_2()
 
             else:
@@ -202,27 +183,22 @@ class Syntactic:
 
     def declaracao_de_subprograma(self):
         index = self.index_atual
+        self.index_atual+=1
 
-        if self.tokens[self.index_atual].type == Types.KEYWORD and
-            self.tokens[self.index_atual].str == "procedure":
+        if self.tokens[self.index_atual].str == "procedure":
 
             self.index_atual+=1
             if self.tokens[self.index_atual].type == Types.IDENTIFIER:
 
-                self.index_atual+=1
                 if self.argumentos() == True:
 
                     self.index_atual+=1
-                    if self.tokens[self.index_atual].type == Types.DELIMTER and
-                        self.tokens[self.index_atual].str == ";":
+                    if self.tokens[self.index_atual].str == ";":
 
-                        self.index_atual+=1
                         if self.declaracoes_variaveis() == True:
 
-                            self.index_atual+=1
                             if self.declaracoes_de_subprogramas() == True:
 
-                                self.index_atual+=1
                                 return self.comando_composto()
 
                             else:
@@ -246,16 +222,14 @@ class Syntactic:
 
     def argumentos(self):
         index = self.index_atual
+        self.index_atual+=1
 
-        if self.tokens[self.index_atual].type == Type.DELIMTER and
-            self.tokens[self.index_atual].str == "(":
+        if self.tokens[self.index_atual].str == "(":
 
-            self.index_atual+=1
             if self.lista_de_parametros() == True:
 
                 self.index_atual+=1
-                if self.tokens[self.index_atual].type == Type.DELIMTER and
-                    self.tokens[self.index_atual].str == ")":
+                if self.tokens[self.index_atual].str == ")":
 
                     return True
 
@@ -277,13 +251,10 @@ class Syntactic:
         if self.lista_de_identificadores() == True:
 
             self.index_atual+=1
-            if self.tokens[self.index_atual].type == Types.DELIMTER and
-                self.tokens[self.index_atual].str == ":":
+            if self.tokens[self.index_atual].str == ":":
 
-                self.index_atual+=1
                 if self.tipo() == True:
 
-                    self.index_atual+=1
                     return self.lista_de_parametros_2()
 
                 else:
@@ -297,21 +268,17 @@ class Syntactic:
 
     def lista_de_parametros_2(self):
         index = self.index_atual
+        self.index_atual+=1
 
-        if self.tokens[self.index_atual].type == Types.DELIMTER and
-            self.tokens[self.index_atual].str == ";"
+        if self.tokens[self.index_atual].str == ";":
 
-            self.index_atual+=1
             if self.lista_de_identificadores() == True:
 
                 self.index_atual+=1
-                if self.tokens[self.index_atual].type == Types.DELIMTER and
-                    self.tokens[self.index_atual].str == ":":
+                if self.tokens[self.index_atual].str == ":":
 
-                    self.index_atual+=1
                     if self.tipo() == True:
 
-                        self.index_atual+=1
                         if self.lista_de_parametros_2() == False:
                             self.index_atual = index
                             return True
@@ -334,16 +301,14 @@ class Syntactic:
 
     def comando_composto(self):
         index = self.index_atual
+        self.index_atual+=1
 
-        if self.tokens[self.index_atual].type == Types.KEYWORD and
-            self.tokens[self.index_atual].str == "begin":
+        if self.tokens[self.index_atual].str == "begin":
 
-            self.index_atual+=1
             if self.comandos_opcionais() == True:
 
                 self.index_atual+=1
-                if self.tokens[self.index_atual].type == Types.KEYWORD and
-                    self.tokens[self.index_atual].str == "end":
+                if self.tokens[self.index_atual].str == "end":
 
                     return True
 
@@ -373,7 +338,6 @@ class Syntactic:
 
         if self.comando() == True:
 
-            self.index_atual+=1
             return self.lista_de_comandos_2()
 
         else:
@@ -381,14 +345,12 @@ class Syntactic:
 
     def lista_de_comandos_2(self):
         index = self.index_atual
+        self.index_atual+=1
 
-        if self.tokens[self.index_atual].type == Type.DELIMTER and
-            self.tokens[self.index_atual].str == ";":
+        if self.tokens[self.index_atual].str == ";":
 
-            self.index_atual+=1
             if self.comando() == True:
 
-                self.index_atual+=1
                 if self.lista_de_comandos_2() == True:
 
                     return True
@@ -412,10 +374,8 @@ class Syntactic:
         if self.variavel() == True:
 
             self.index_atual+=1
-            if self.tokens[self.index_atual].type == Types.CMD_ATTR and
-                self.tokens[self.index_atual].str == Types.CMD_ATTR_STR:
+            if self.tokens[self.index_atual].str == Types.CMD_ATTR_STR:
 
-                self.index_atual+=1
                 if self.expressao() == True:
 
                     return True
@@ -435,37 +395,34 @@ class Syntactic:
         # backtrack e testa o quarto caso
         self.index_atual = index
 
-        if self.tokens[self.index_atual].type == Types.KEYWORD and
-            self.tokens[self.index_atual].str == "if":
+        self.index_atual+=1
+        if self.tokens[self.index_atual].str == "if":
 
-            self.index_atual+=1
             if self.expressao() == True:
 
                 self.index_atual+=1
-                if self.tokens[self.index_atual].type == Types.KEYWORD and
-                    self.tokens[self.index_atual].str == "then":
+                if self.tokens[self.index_atual].str == "then":
 
-                    self.index_atual+=1
                     if self.comando() == True:
 
-                        self.index_atual+=1
+                        index = self.index_atual
                         if self.parte_else() == True:
+                            return True
+                        else:
+                            self.index_atual = index
                             return True
 
         # backtrack e testa o quinto caso
         self.index_atual = index
 
-        if self.tokens[self.index_atual].type == Types.KEYWORD and
-            self.tokens[self.index_atual].str == "while":
+        self.index_atual+=1
+        if self.tokens[self.index_atual].str == "while":
 
-            self.index_atual+=1
             if self.expressao() == True:
 
                 self.index_atual+=1
-                if self.tokens[self.index_atual].type == Types.KEYWORD and
-                    self.tokens[self.index_atual].str == "do":
+                if self.tokens[self.index_atual].str == "do":
 
-                    self.index_atual+=1
                     if self.comando() == True:
                         return True
 
@@ -474,10 +431,9 @@ class Syntactic:
     def parte_else(self):
         index = self.index_atual
 
-        if self.tokens[self.index_atual].type == Types.KEYWORD and
-            self.tokens[self.index_atual].str == "else":
+        self.index_atual+=1
+        if self.tokens[self.index_atual].str == "else":
 
-            self.index_atual+=1
             if self.comando() == True:
 
                 return True
@@ -493,22 +449,21 @@ class Syntactic:
     def variavel(self):
         index = self.index_atual
 
+        self.index_atual+=1
         return self.tokens[self.index_atual].type == Types.IDENTIFIER
 
     def ativacao_de_procedimento(self):
         index = self.index_atual
 
-        if self.tokens[self.index_atual].type == Types.IDENTIFIER
+        self.index_atual+=1
+        if self.tokens[self.index_atual].type == Types.IDENTIFIER:
 
             self.index_atual+=1
-            # Testar se é delimitador
             if self.tokens[self.index_atual].str == "(":
 
-                self.index_atual+=1
                 if self.lista_de_expressoes() == True:
 
                     self.index_atual+=1
-                    # Testar se é delimitador
                     if self.tokens[self.index_atual].str == ")":
                         return True
 
@@ -519,6 +474,7 @@ class Syntactic:
                     return False
 
             else:
+                self.index_atual-=1
                 return True
 
         else:
@@ -529,7 +485,6 @@ class Syntactic:
 
         if self.expressao() == True:
 
-            self.index_atual+=1 ## Checar incremento
             return self.lista_de_expressoes_2()
 
         else:
@@ -538,13 +493,11 @@ class Syntactic:
     def lista_de_expressoes_2(self):
         index = self.index_atual
 
-        # Testar se é delimitador
-        if self.tokens[self.index_atual].str == ","
+        self.index_atual+=1
+        if self.tokens[self.index_atual].str == ",":
 
-            self.index_atual+=1 ## Checar incremento
             if self.expressao() == True:
 
-                self.index_atual+=1 ## Checar incremento
                 if self.lista_de_expressoes_2() == True:
                     return True
 
@@ -554,7 +507,7 @@ class Syntactic:
 
             else:
                 self.index_atual = index
-                return True ## Verificar com Gustavo, se temos uma ",", expressao é obrigatório
+                return True
 
         else:
             self.index_atual = index
@@ -565,27 +518,23 @@ class Syntactic:
 
         if self.expressao_simples() == True:
 
-            self.index_atual+=1 ## Checar incremento
             if self.op_relacional() == True:
 
-                self.index_atual+=1 ## Checar incremento
-                return self.expressao_simples()
+                if self.expressao_simples() == True:
+                    return True
 
-            else:
-                return True
+        # backtrack e testa caso de ser só expressao_simples
+        self.index_atual = index
+        return self.expressao_simples()
 
-        else:
-            return False
 
     def expressao_simples(self):
         index = self.index_atual
 
         if self.sinal() == True:
 
-            self.index_atual+=1
             if self.termo() == True:
 
-                self.index_atual+=1
                 return self.expressao_simples_2()
 
             else:
@@ -593,9 +542,9 @@ class Syntactic:
 
         else:
 
+            self.index_atual = index
             if self.termo() == True:
 
-                self.index_atual+=1
                 return self.expressao_simples_2()
 
             else:
@@ -606,10 +555,8 @@ class Syntactic:
 
         if self.op_aditivo() == True:
 
-            self.index_atual+=1 ## Checar incremento
             if self.termo() == True:
 
-                self.index_atual+=1 ## Checar incremento
                 if self.expressao_simples_2() == True:
                     return True
 
@@ -619,7 +566,7 @@ class Syntactic:
 
             else:
                 self.index_atual = index
-                return True ## Verificar com Gustavo, se temos um op_aditivo, termo é obrigatório
+                return True
 
         else:
             self.index_atual = index
@@ -630,7 +577,6 @@ class Syntactic:
 
         if self.fator() == True:
 
-            self.index_atual+=1
             return self.termo_2()
 
         else:
@@ -641,10 +587,8 @@ class Syntactic:
 
         if self.op_multiplicativo() == True:
 
-            self.index_atual+=1 ## Checar incremento
             if self.fator() == True:
 
-                self.index_atual+=1 ## Checar incremento
                 if self.termo_2() == True:
                     return True
 
@@ -654,7 +598,7 @@ class Syntactic:
 
             else:
                 self.index_atual = index
-                return True ## Verificar com Gustavo, se temos um op_mult, fator é obrigatório
+                return True
 
         else:
             self.index_atual = index
@@ -662,18 +606,16 @@ class Syntactic:
 
     def fator(self):
         index = self.index_atual
+        self.index_atual+=1
 
-        if self.tokens[self.index_atual].type == Types.IDENTIFIER
+        if self.tokens[self.index_atual].type == Types.IDENTIFIER:
 
             self.index_atual+=1
-            # Testar se é delimitador
             if self.tokens[self.index_atual].str == "(":
 
-                self.index_atual+=1
                 if self.lista_de_expressoes() == True:
 
                     self.index_atual+=1
-                    # Testar se é delimitador
                     if self.tokens[self.index_atual].str == ")":
                         return True
 
@@ -684,28 +626,23 @@ class Syntactic:
                     return False
 
             else:
+                self.index_atual-=1
                 return True
 
         else:
-            if self.tokens[self.index_atual].type == Types.NUMBER_INT or
-
-                self.tokens[self.index_atual].type == Types.NUMBER_REAL or
-
-                self.tokens[self.index_atual].str == "true" or
-
+            if self.tokens[self.index_atual].type == Types.NUMBER_INT or \
+                self.tokens[self.index_atual].type == Types.NUMBER_REAL or \
+                self.tokens[self.index_atual].str == "true" or \
                 self.tokens[self.index_atual].str == "false":
 
                     return True
 
             else:
-                # Testar se é delimitador
                 if self.tokens[self.index_atual].str == "(":
 
-                    self.index_atual+=1
                     if self.expressao() == True:
 
                         self.index_atual+=1
-                        # Testar se é delimitador
                         if self.tokens[self.index_atual].str == ")":
                             return True
 
@@ -716,10 +653,9 @@ class Syntactic:
                         return False
 
                 else:
-                    if self.tokens[self.index_atual].type == Types.KEYWORD and
+                    if self.tokens[self.index_atual].type == Types.KEYWORD and \
                         self.tokens[self.index_atual].str == "not":
 
-                        self.index_atual+=1
                         if self.fator() == True:
                             return True
 
@@ -732,8 +668,8 @@ class Syntactic:
     def sinal(self):
         index = self.index_atual
 
-        if self.tokens[self.index_atual].str == "+" or
-
+        self.index_atual+=1
+        if self.tokens[self.index_atual].str == "+" or \
             self.tokens[self.index_atual].str == "-":
 
             return True
@@ -744,16 +680,12 @@ class Syntactic:
     def op_relacional(self):
         index = self.index_atual
 
-        if self.tokens[self.index_atual].str == "=" or
-
-            self.tokens[self.index_atual].str == "<" or
-
-            self.tokens[self.index_atual].str == ">" or
-
-            self.tokens[self.index_atual].str == "<=" or
-
-            self.tokens[self.index_atual].str == ">=" or
-
+        self.index_atual+=1
+        if self.tokens[self.index_atual].str == "=" or \
+            self.tokens[self.index_atual].str == "<" or \
+            self.tokens[self.index_atual].str == ">" or \
+            self.tokens[self.index_atual].str == "<=" or \
+            self.tokens[self.index_atual].str == ">=" or \
             self.tokens[self.index_atual].str == "<>":
 
             return True
@@ -764,10 +696,9 @@ class Syntactic:
     def op_aditivo(self):
         index = self.index_atual
 
-        if self.tokens[self.index_atual].str == "+" or
-
-            self.tokens[self.index_atual].str == "-" or
-
+        self.index_atual+=1
+        if self.tokens[self.index_atual].str == "+" or \
+            self.tokens[self.index_atual].str == "-" or \
             self.tokens[self.index_atual].str == "or":
 
             return True
@@ -778,10 +709,9 @@ class Syntactic:
     def op_multiplicativo(self):
         index = self.index_atual
 
-        if self.tokens[self.index_atual].str == "*" or
-
-            self.tokens[self.index_atual].str == "/" or
-
+        self.index_atual+=1
+        if self.tokens[self.index_atual].str == "*" or \
+            self.tokens[self.index_atual].str == "/" or \
             self.tokens[self.index_atual].str == "and":
 
             return True
