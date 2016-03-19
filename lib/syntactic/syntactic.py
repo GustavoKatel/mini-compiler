@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 from ..types import Types
 
 class Syntactic:
@@ -489,3 +489,302 @@ class Syntactic:
         else:
             self.index_atual = index
             return True
+
+    def variavel(self):
+        index = self.index_atual
+
+        return self.tokens[self.index_atual].type == Types.IDENTIFIER
+
+    def ativacao_de_procedimento(self):
+        index = self.index_atual
+
+        if self.tokens[self.index_atual].type == Types.IDENTIFIER
+
+            self.index_atual+=1
+            # Testar se é delimitador
+            if self.tokens[self.index_atual].str == "(":
+
+                self.index_atual+=1
+                if self.lista_de_expressoes() == True:
+
+                    self.index_atual+=1
+                    # Testar se é delimitador
+                    if self.tokens[self.index_atual].str == ")":
+                        return True
+
+                    else:
+                        return False
+
+                else:
+                    return False
+
+            else:
+                return True
+
+        else:
+            return False
+
+    def lista_de_expressoes(self):
+        index = self.index_atual
+
+        if self.expressao() == True:
+
+            self.index_atual+=1 ## Checar incremento
+            return self.lista_de_expressoes_2()
+
+        else:
+            return False
+
+    def lista_de_expressoes_2(self):
+        index = self.index_atual
+
+        # Testar se é delimitador
+        if self.tokens[self.index_atual].str == ","
+
+            self.index_atual+=1 ## Checar incremento
+            if self.expressao() == True:
+
+                self.index_atual+=1 ## Checar incremento
+                if self.lista_de_expressoes_2() == True:
+                    return True
+
+                else:
+                    self.index_atual = index
+                    return True
+
+            else:
+                self.index_atual = index
+                return True ## Verificar com Gustavo, se temos uma ",", expressao é obrigatório
+
+        else:
+            self.index_atual = index
+            return True
+
+    def expressao(self):
+        index = self.index_atual
+
+        if self.expressao_simples() == True:
+
+            self.index_atual+=1 ## Checar incremento
+            if self.op_relacional() == True:
+
+                self.index_atual+=1 ## Checar incremento
+                return self.expressao_simples()
+
+            else:
+                return True
+
+        else:
+            return False
+
+    def expressao_simples(self):
+        index = self.index_atual
+
+        if self.sinal() == True:
+
+            self.index_atual+=1
+            if self.termo() == True:
+
+                self.index_atual+=1
+                return self.expressao_simples_2()
+
+            else:
+                return False
+
+        else:
+
+            if self.termo() == True:
+
+                self.index_atual+=1
+                return self.expressao_simples_2()
+
+            else:
+                return False
+
+    def expressao_simples_2(self):
+        index = self.index_atual
+
+        if self.op_aditivo() == True:
+
+            self.index_atual+=1 ## Checar incremento
+            if self.termo() == True:
+
+                self.index_atual+=1 ## Checar incremento
+                if self.expressao_simples_2() == True:
+                    return True
+
+                else:
+                    self.index_atual = index
+                    return True
+
+            else:
+                self.index_atual = index
+                return True ## Verificar com Gustavo, se temos um op_aditivo, termo é obrigatório
+
+        else:
+            self.index_atual = index
+            return True
+
+    def termo(self):
+        index = self.index_atual
+
+        if self.fator() == True:
+
+            self.index_atual+=1
+            return self.termo_2()
+
+        else:
+            return False
+
+    def termo_2(self):
+        index = self.index_atual
+
+        if self.op_multiplicativo() == True:
+
+            self.index_atual+=1 ## Checar incremento
+            if self.fator() == True:
+
+                self.index_atual+=1 ## Checar incremento
+                if self.termo_2() == True:
+                    return True
+
+                else:
+                    self.index_atual = index
+                    return True
+
+            else:
+                self.index_atual = index
+                return True ## Verificar com Gustavo, se temos um op_mult, fator é obrigatório
+
+        else:
+            self.index_atual = index
+            return True
+
+    def fator(self):
+        index = self.index_atual
+
+        if self.tokens[self.index_atual].type == Types.IDENTIFIER
+
+            self.index_atual+=1
+            # Testar se é delimitador
+            if self.tokens[self.index_atual].str == "(":
+
+                self.index_atual+=1
+                if self.lista_de_expressoes() == True:
+
+                    self.index_atual+=1
+                    # Testar se é delimitador
+                    if self.tokens[self.index_atual].str == ")":
+                        return True
+
+                    else:
+                        return False
+
+                else:
+                    return False
+
+            else:
+                return True
+
+        else:
+            if self.tokens[self.index_atual].type == Types.NUMBER_INT or
+
+                self.tokens[self.index_atual].type == Types.NUMBER_REAL or
+
+                self.tokens[self.index_atual].str == "true" or
+
+                self.tokens[self.index_atual].str == "false":
+
+                    return True
+
+            else:
+                # Testar se é delimitador
+                if self.tokens[self.index_atual].str == "(":
+
+                    self.index_atual+=1
+                    if self.expressao() == True:
+
+                        self.index_atual+=1
+                        # Testar se é delimitador
+                        if self.tokens[self.index_atual].str == ")":
+                            return True
+
+                        else:
+                            return False
+
+                    else:
+                        return False
+
+                else:
+                    if self.tokens[self.index_atual].type == Types.KEYWORD and
+                        self.tokens[self.index_atual].str == "not":
+
+                        self.index_atual+=1
+                        if self.fator() == True:
+                            return True
+
+                        else:
+                            return False
+
+                    else:
+                        return False
+
+    def sinal(self):
+        index = self.index_atual
+
+        if self.tokens[self.index_atual].str == "+" or
+
+            self.tokens[self.index_atual].str == "-":
+
+            return True
+
+        else:
+            return False
+
+    def op_relacional(self):
+        index = self.index_atual
+
+        if self.tokens[self.index_atual].str == "=" or
+
+            self.tokens[self.index_atual].str == "<" or
+
+            self.tokens[self.index_atual].str == ">" or
+
+            self.tokens[self.index_atual].str == "<=" or
+
+            self.tokens[self.index_atual].str == ">=" or
+
+            self.tokens[self.index_atual].str == "<>":
+
+            return True
+
+        else:
+            return False
+
+    def op_aditivo(self):
+        index = self.index_atual
+
+        if self.tokens[self.index_atual].str == "+" or
+
+            self.tokens[self.index_atual].str == "-" or
+
+            self.tokens[self.index_atual].str == "or":
+
+            return True
+
+        else:
+            return False
+
+    def op_multiplicativo(self):
+        index = self.index_atual
+
+        if self.tokens[self.index_atual].str == "*" or
+
+            self.tokens[self.index_atual].str == "/" or
+
+            self.tokens[self.index_atual].str == "and":
+
+            return True
+
+        else:
+            return False

@@ -25,6 +25,6 @@ for tok in tokens:
     print template.format(*tok.get_tuple())
 
 syntactic = Syntactic(tokens)
-syntactic.parse()
+print syntactic.parse()
 
 # TODO serialize table to file
