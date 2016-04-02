@@ -26,7 +26,8 @@ template = "{0:10} {1:25} {2:5}"  # column widths: 10, 20, 5
 
 syntactic = Syntactic(tokens)
 try:
-    print syntactic.parse()
+    if syntactic.parse() == False:
+        print "Erro sintático"
 except Exception as e:
     # traceback.print_exc()
     print str(e)
