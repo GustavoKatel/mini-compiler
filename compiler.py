@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sys
+import sys, traceback
 from lib.lexer import Lexer
 from lib.syntactic import Syntactic
 
@@ -19,12 +19,16 @@ except Exception as e:
 
 template = "{0:10} {1:25} {2:5}"  # column widths: 10, 20, 5
 
-print template.format('Token', 'Classificacao', 'Linha')
+# print template.format('Token', 'Classificacao', 'Linha')
 
-for tok in tokens:
-    print template.format(*tok.get_tuple())
+# for tok in tokens:
+#     print template.format(*tok.get_tuple())
 
 syntactic = Syntactic(tokens)
-print syntactic.parse()
+try:
+    print syntactic.parse()
+except Exception as e:
+    traceback.print_exc()
+    print str(e)
 
 # TODO serialize table to file

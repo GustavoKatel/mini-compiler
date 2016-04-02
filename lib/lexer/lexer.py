@@ -11,6 +11,10 @@ class Lexer:
 
         self.tokens = []
 
+    def append(self, token):
+        token.index = len(self.tokens)
+        self.tokens.append(token)
+
     def parse(self):
         try:
             self.parseLoop()
@@ -51,7 +55,7 @@ class Lexer:
                             break
                 else:
                     token = Token('/', line, Types.MUL_OPERATOR)
-                    self.tokens.append(token)
+                    self.append(token)
 
                     fd_pos -= 1
                     self.fd.seek(fd_pos)
@@ -151,7 +155,7 @@ class Lexer:
                         token = Token(token_str, line, Types.NUMBER_REAL)
                     else:
                         token = Token(token_str, line, Types.NUMBER_INT)
-                self.tokens.append(token)
+                self.append(token)
                 # print "Found token: %s" % token
 
             # e,f) delimiter. Also checks the CMD_ATTR
@@ -171,7 +175,7 @@ class Lexer:
                         self.fd.seek(fd_pos)  # go back
 
                 token = Token(token_str, line, ttype)
-                self.tokens.append(token)
+                self.append(token)
                 # print "Found token: %s" % token
 
             # g) Relational operators
@@ -191,7 +195,7 @@ class Lexer:
 
                 # we have a token
                 token = Token(token_str, line, Types.RELATIONAL_OPERATOR)
-                self.tokens.append(token)
+                self.append(token)
 
             # h) additive operators
             elif self._in_list_starts_with(char, Types.ADD_OPERATOR_LIST):
@@ -217,10 +221,10 @@ class Lexer:
                 # verificar que 'o' não seja adicionar como ADD_OPERATOR (as 'or')
                 if not token_str in Types.ADD_OPERATOR_LIST:
                     token = Token(token_str, line, Types.IDENTIFIER)
-                    self.tokens.append(token)
+                    self.append(token)
                 else:
                     token = Token(token_str, line, Types.ADD_OPERATOR)
-                    self.tokens.append(token)
+                    self.append(token)
 
             #  i) multiplicative operators
             elif self._in_list_starts_with(char, Types.MUL_OPERATOR_LIST):
@@ -240,10 +244,10 @@ class Lexer:
                 # verificar que 'a' não seja adicionar como MUL_OPERATOR (as 'and')
                 if not token_str in Types.MUL_OPERATOR_LIST:
                     token = Token(token_str, line, Types.IDENTIFIER)
-                    self.tokens.append(token)
+                    self.append(token)
                 else:
                     token = Token(token_str, line, Types.MUL_OPERATOR)
-                    self.tokens.append(token)
+                    self.append(token)
 
             # a,b) check IDENTIFIER/KEYWORD
             elif char.isalpha():  # is alpha
@@ -269,7 +273,7 @@ class Lexer:
                     token = Token(token_str, line, Types.KEYWORD)
                 else:
                     token = Token(token_str, line, Types.IDENTIFIER)
-                self.tokens.append(token)
+                self.append(token)
                 # print "Found token: %s" % token
 
             else:

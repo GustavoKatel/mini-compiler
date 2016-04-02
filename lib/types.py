@@ -14,6 +14,7 @@ class Types:
     MUL_OPERATOR = 9
     NUMBER_COMPLEX = 10
     LOGICAL_OPERATOR = 11
+    MARKER = 12
 
     KEYWORD_LIST = ["program", "var", "integer", "real", "boolean",
                     "procedure", "begin", "end", "if", "then", "else", "while",

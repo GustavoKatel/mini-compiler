@@ -4,10 +4,15 @@ from ..types import Types
 
 class Token:
 
-    def __init__(self, tok="", line=0, ttype=Types.KEYWORD):
+    def __init__(self, tok="", line=0, ttype=Types.KEYWORD, stype="", index=0):
         self.type = ttype
         self.str = tok
         self.line = line
+        self.index = 0
+        if stype=="":
+            self.semantic_type = Types.MARKER
+        else:
+            self.semantic_type = stype
 
     def get_tuple(self):
         type_str = Types.typeToStr(self.type)

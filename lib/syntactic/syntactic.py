@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
+import sys, copy
 from ..types import Types
+from ..lexer import Token
 
 class Syntactic:
 
     def __init__(self, tokens):
+        self.scope_stack = []
+        self.pct_stack = []
+        self.variable_count = 0
+        self.declaration = False
         self.tokens = tokens
         self.index_atual = -1
 
@@ -14,6 +20,8 @@ class Syntactic:
         index = self.index_atual
         self.index_atual+=1
 
+        self.do_stack_marker()
+
         # self.index_atual é 0
         if self.tokens[self.index_atual].str != "program":
             return False
@@ -22,10 +30,16 @@ class Syntactic:
         if self.tokens[self.index_atual].type != Types.IDENTIFIER:
             return False
 
+        # add program identifier to the stack
+        # print self.tokens[self.index_atual+1]
+        self.tokens[self.index_atual].semantic_type = "program"
+        self.do_stack_add(self.tokens[self.index_atual])
+
         self.index_atual+=1
         if self.tokens[self.index_atual].str != ";":
             return False
 
+        self.declaration = True
         if self.declaracoes_variaveis() == False:
             return False
 
@@ -38,6 +52,18 @@ class Syntactic:
         self.index_atual+=1
         if self.tokens[self.index_atual].str != ".":
             return False
+
+        # self.do_stack_clean()
+
+        print
+        print "----- Scope Stack -----"
+        for t in self.scope_stack:
+            print "%s = %s (%s)" % (t.str, t.semantic_type, t.index)
+
+        print
+        print "----- PCT Stack -----"
+        for t in self.pct_stack:
+            print "%s = %s (%s)" % (t.str, t.semantic_type, t.index)
 
         return True
 
@@ -119,6 +145,11 @@ class Syntactic:
 
         if self.tokens[self.index_atual].type == Types.IDENTIFIER:
 
+            if self.do_stack_add(self.tokens[self.index_atual]) == False:
+                print "Símbolo já definido: " + self.tokens[self.index_atual].str + " Linha: " + str(self.tokens[self.index_atual].line)
+                raise Exception("")
+            self.variable_count+=1
+
             return self.lista_de_identificadores_2()
 
         else:
@@ -132,6 +163,11 @@ class Syntactic:
 
             self.index_atual+=1
             if self.tokens[self.index_atual].type == Types.IDENTIFIER:
+
+                if self.do_stack_add(self.tokens[self.index_atual]) == False:
+                    print "Símbolo já definido: " + self.tokens[self.index_atual].str + " Linha: " + str(self.tokens[self.index_atual].line)
+                    raise Exception("")
+                self.variable_count+=1
 
                 return self.lista_de_identificadores_2()
 
@@ -148,17 +184,22 @@ class Syntactic:
         self.index_atual+=1
 
         if self.tokens[self.index_atual].str == "integer":
+            self.do_stack_types("integer")
             return True
 
         if self.tokens[self.index_atual].str == "real":
+            self.do_stack_types("real")
             return True
 
         if self.tokens[self.index_atual].str == "boolean":
+            self.do_stack_types("boolean")
             return True
 
         return False
 
     def declaracoes_de_subprogramas(self):
+        self.declaration = False
+
         index = self.index_atual
 
         return self.declaracoes_de_subprogramas_2()
@@ -190,16 +231,27 @@ class Syntactic:
             self.index_atual+=1
             if self.tokens[self.index_atual].type == Types.IDENTIFIER:
 
+                # add procedure identifier to the stack
+                self.tokens[self.index_atual].semantic_type = "procedure"
+                if self.do_stack_add(self.tokens[self.index_atual]) == False:
+                    print "Símbolo já definido: " + self.tokens[self.index_atual].str + " Linha: " + str(self.tokens[self.index_atual].line)
+                    raise Exception("")
+
+                self.do_stack_marker()
+
                 if self.argumentos() == True:
 
                     self.index_atual+=1
                     if self.tokens[self.index_atual].str == ";":
 
+                        self.declaration = True
                         if self.declaracoes_variaveis() == True:
 
                             if self.declaracoes_de_subprogramas() == True:
 
-                                return self.comando_composto()
+                                res = self.comando_composto()
+                                # self.do_stack_clean()
+                                return res
 
                             else:
                                 return False
@@ -450,13 +502,33 @@ class Syntactic:
         index = self.index_atual
 
         self.index_atual+=1
-        return self.tokens[self.index_atual].type == Types.IDENTIFIER
+
+        token = self.tokens[self.index_atual]
+
+        if token.type == Types.IDENTIFIER:
+            if self.check_isdeclared(token) == False:
+                print "Símbolo não declarado: " + token.str + " Linha: " + str(token.line)
+                raise Exception("Símbolo não declarado: " + token.str + " Linha: " + str(token.line))
+
+            t = self.get_stack_token(token.str)
+            t = copy.copy(t)
+            t.index = token.index
+            self.do_pct_add(t)
+
+            return True
+
+        return False
 
     def ativacao_de_procedimento(self):
         index = self.index_atual
 
         self.index_atual+=1
         if self.tokens[self.index_atual].type == Types.IDENTIFIER:
+
+            token = self.tokens[self.index_atual]
+            if self.check_isdeclared(token) == False:
+                print "Símbolo não declarado: " + token.str + " Linha: " + str(token.line)
+                raise Exception("Símbolo não declarado: " + token.str + " Linha: " + str(token.line))
 
             self.index_atual+=1
             if self.tokens[self.index_atual].str == "(":
@@ -610,6 +682,16 @@ class Syntactic:
 
         if self.tokens[self.index_atual].type == Types.IDENTIFIER:
 
+            token = self.tokens[self.index_atual]
+            if self.check_isdeclared(token) == False:
+                print "Símbolo não declarado: " + token.str + " Linha: " + str(token.line)
+                raise Exception("Símbolo não declarado: " + token.str + " Linha: " + str(token.line))
+
+            t = self.get_stack_token(token.str)
+            t = copy.copy(t)
+            t.index = token.index
+            self.do_pct_add(t)
+
             self.index_atual+=1
             if self.tokens[self.index_atual].str == "(":
 
@@ -630,12 +712,25 @@ class Syntactic:
                 return True
 
         else:
-            if self.tokens[self.index_atual].type == Types.NUMBER_INT or \
-                self.tokens[self.index_atual].type == Types.NUMBER_REAL or \
-                self.tokens[self.index_atual].str == "true" or \
-                self.tokens[self.index_atual].str == "false":
+            if self.tokens[self.index_atual].type == Types.NUMBER_INT:
+                self.tokens[self.index_atual].semantic_type = "integer"
+                self.do_pct_add(self.tokens[self.index_atual])
+                return True
 
-                    return True
+            elif self.tokens[self.index_atual].type == Types.NUMBER_REAL:
+                self.tokens[self.index_atual].semantic_type = "real"
+                self.do_pct_add(self.tokens[self.index_atual])
+                return True
+
+            elif self.tokens[self.index_atual].str == "true":
+                self.tokens[self.index_atual].semantic_type = "boolean"
+                self.do_pct_add(self.tokens[self.index_atual])
+                return True
+
+            elif self.tokens[self.index_atual].str == "false":
+                self.tokens[self.index_atual].semantic_type = "boolean"
+                self.do_pct_add(self.tokens[self.index_atual])
+                return True
 
             else:
                 if self.tokens[self.index_atual].str == "(":
@@ -718,3 +813,53 @@ class Syntactic:
 
         else:
             return False
+
+    def get_stack_token(self, symbol):
+        for t in self.scope_stack[::-1]:
+            if t.str == symbol:
+                return t
+        return False
+
+    def check_isdeclared(self, token):
+        for t in self.scope_stack[::-1]:
+            if t.str == token.str:
+                return True
+        return False
+
+    def do_stack_add(self, token):
+        for t in self.scope_stack[::-1]:
+            if t.str == "$":
+                break
+            if t.str == token.str:
+                return False
+
+        self.scope_stack.append(token)
+        return True
+
+    def do_stack_types(self, stype):
+        for i in range(self.variable_count):
+            self.scope_stack[-(i+1)].semantic_type = stype
+
+        self.variable_count = 0
+
+    def do_stack_marker(self):
+        self.scope_stack.append(Token(tok="$", ttype=Types.MARKER, stype=Types.MARKER))
+
+    def do_stack_clean(self):
+        t = self.scope_stack.pop()
+
+        while t.str != "$":
+            t = self.scope_stack.pop()
+
+    def do_backtrack_pct(self, index):
+        i = 0
+        while i < len(self.pct_stack):
+            if self.pct_stack[i].index >= index:
+                del self.pct_stack[i]
+            else:
+                i+=1
+
+    def do_pct_add(self, token):
+        self.do_backtrack_pct(token.index)
+
+        self.pct_stack.append(token)
