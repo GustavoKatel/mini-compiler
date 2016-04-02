@@ -18,7 +18,7 @@ class Types:
 
     KEYWORD_LIST = ["program", "var", "integer", "real", "boolean",
                     "procedure", "begin", "end", "if", "then", "else", "while",
-                    "do", "not"]
+                    "do", "not", "true", "false"]
 
     DELIMTER_LIST = [";", ".", ":", "(", ")", ","]
 

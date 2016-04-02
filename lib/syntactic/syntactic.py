@@ -429,7 +429,7 @@ class Syntactic:
             if self.tokens[self.index_atual].str == Types.CMD_ATTR_STR:
 
                 if self.expressao() == True:
-
+                    self.do_pct_check_attr()
                     return True
 
         # backtrack e testa o segundo caso
@@ -513,6 +513,7 @@ class Syntactic:
             t = self.get_stack_token(token.str)
             t = copy.copy(t)
             t.index = token.index
+            t.line = token.line
             self.do_pct_add(t)
 
             return True
@@ -592,7 +593,10 @@ class Syntactic:
 
             if self.op_relacional() == True:
 
+                op = self.tokens[self.index_atual].str
+
                 if self.expressao_simples() == True:
+                    self.do_pct_check_operation(op)
                     return True
 
         # backtrack e testa caso de ser só expressao_simples
@@ -627,7 +631,11 @@ class Syntactic:
 
         if self.op_aditivo() == True:
 
+            op = self.tokens[self.index_atual].str
+
             if self.termo() == True:
+
+                self.do_pct_check_operation(op)
 
                 if self.expressao_simples_2() == True:
                     return True
@@ -659,7 +667,11 @@ class Syntactic:
 
         if self.op_multiplicativo() == True:
 
+            op = self.tokens[self.index_atual].str
+
             if self.fator() == True:
+
+                self.do_pct_check_operation(op)
 
                 if self.termo_2() == True:
                     return True
@@ -690,6 +702,7 @@ class Syntactic:
             t = self.get_stack_token(token.str)
             t = copy.copy(t)
             t.index = token.index
+            t.line = token.line
             self.do_pct_add(t)
 
             self.index_atual+=1
@@ -863,3 +876,51 @@ class Syntactic:
         self.do_backtrack_pct(token.index)
 
         self.pct_stack.append(token)
+
+    def do_pct_check_attr(self):
+        topo = self.pct_stack.pop()  # V1 [op V2]
+        subtopo = self.pct_stack.pop()  # V3
+
+        if topo.semantic_type == "boolean" and subtopo.semantic_type != "boolean":
+            raise Exception("Tipos inválidos: boolean para numérico Linha: %s" % str(topo.line))
+
+        if subtopo.semantic_type == "boolean" and topo.semantic_type != "boolean":
+            raise Exception("Tipos inválidos: numérico para boolean Linha: %s" % str(topo.line))
+
+        if topo.semantic_type == "real" and subtopo.semantic_type == "integer":
+            raise Exception("Tipos inválidos: real para integer Linha: %s" % str(subtopo.line))
+
+        return True
+
+    def do_pct_check_operation(self, op=""):
+        topo = self.pct_stack.pop()  # V2
+        subtopo = self.pct_stack.pop()  # V3
+
+        if op in ["or", "and"]:
+            if topo.semantic_type != "boolean" or subtopo.semantic_type != "boolean":
+                raise Exception("Operação lógica não compatível com tipos numéricos Linha: %s" % str(topo.line))
+
+        if op in Types.RELATIONAL_OPERATOR_LIST:
+            if topo.semantic_type == "boolean" or subtopo.semantic_type == "boolean":
+                raise Exception("Operação relacional não compatível com tipo boolean Linha: %s" % str(topo.line))
+
+        if topo.semantic_type == "boolean" and subtopo.semantic_type != "boolean":
+            raise Exception("Tipos inválidos: numérico e boolean Linha: %s" % str(topo.line))
+
+        if subtopo.semantic_type == "boolean" and topo.semantic_type != "boolean":
+            raise Exception("Tipos inválidos: boolean e numérico Linha: %s" % str(topo.line))
+
+        if topo.semantic_type == "real":
+            self.pct_stack.append(topo)
+            return True
+
+        if subtopo.semantic_type == "real":
+            self.pct_stack.append(subtopo)
+            return True
+
+        if topo.semantic_type == "boolean":
+            self.pct_stack.append(topo)
+            return True
+
+        self.pct_stack.append(topo)
+        return True

@@ -28,7 +28,7 @@ syntactic = Syntactic(tokens)
 try:
     print syntactic.parse()
 except Exception as e:
-    traceback.print_exc()
+    # traceback.print_exc()
     print str(e)
 
 # TODO serialize table to file
