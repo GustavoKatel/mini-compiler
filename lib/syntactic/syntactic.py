@@ -53,7 +53,7 @@ class Syntactic:
         if self.tokens[self.index_atual].str != ".":
             return False
 
-        # self.do_stack_clean()
+        self.do_stack_clean()
 
         print
         print "----- Scope Stack -----"
@@ -250,7 +250,7 @@ class Syntactic:
                             if self.declaracoes_de_subprogramas() == True:
 
                                 res = self.comando_composto()
-                                # self.do_stack_clean()
+                                self.do_stack_clean()
                                 return res
 
                             else:
@@ -334,6 +334,8 @@ class Syntactic:
                         if self.lista_de_parametros_2() == False:
                             self.index_atual = index
                             return True
+
+                        return True
 
                     else:
                         self.index_atual = index
@@ -861,8 +863,10 @@ class Syntactic:
     def do_stack_clean(self):
         t = self.scope_stack.pop()
 
+        # return
         while t.str != "$":
             t = self.scope_stack.pop()
+            # pass
 
     def do_backtrack_pct(self, index):
         i = 0
@@ -881,6 +885,9 @@ class Syntactic:
         topo = self.pct_stack.pop()  # V1 [op V2]
         subtopo = self.pct_stack.pop()  # V3
 
+        if topo.semantic_type == "procedure" or subtopo.semantic_type == "procedure":
+            raise Exception("Operação não compatível com tipo 'procedure' Linha: %s" % str(topo.line))
+
         if topo.semantic_type == "boolean" and subtopo.semantic_type != "boolean":
             raise Exception("Tipos inválidos: boolean para numérico Linha: %s" % str(topo.line))
 
@@ -895,6 +902,9 @@ class Syntactic:
     def do_pct_check_operation(self, op=""):
         topo = self.pct_stack.pop()  # V2
         subtopo = self.pct_stack.pop()  # V3
+
+        if topo.semantic_type == "procedure" or subtopo.semantic_type == "procedure":
+            raise Exception("Operação não compatível com tipo 'procedure' Linha: %s" % str(topo.line))
 
         if op in ["or", "and"]:
             if topo.semantic_type != "boolean" or subtopo.semantic_type != "boolean":
